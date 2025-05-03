@@ -21,6 +21,27 @@ function App() {
   
   // LSTM model parameters
   const [lstmUnits, setLstmUnits] = useState(50);
+  
+  // ARIMA model parameters
+  const [pValue, setPValue] = useState(1);
+  const [dValue, setDValue] = useState(1);
+  const [qValue, setQValue] = useState(1);
+  
+  // Prophet model parameters
+  const [seasonalityMode, setSeasonalityMode] = useState('additive');
+  const [changePointPrior, setChangePointPrior] = useState(0.05);
+  const [seasonalityPrior, setSeasonalityPrior] = useState(10);
+  
+  // XGBoost model parameters
+  const [maxDepth, setMaxDepth] = useState(6);
+  const [learningRate, setLearningRate] = useState(0.1);
+  const [nEstimators, setNEstimators] = useState(100);
+  
+  // Transformer model parameters
+  const [numHeads, setNumHeads] = useState(8);
+  const [numEncoderLayers, setNumEncoderLayers] = useState(4);
+  const [dropoutRate, setDropoutRate] = useState(0.1);
+  const [dimModel, setDimModel] = useState(64);
 
   const handleFileChange = (e) => {
     if (e.target.files[0]) {
@@ -92,6 +113,23 @@ function App() {
           kernelSize: parseInt(kernelSize),
           // LSTM specific params
           lstmUnits: parseInt(lstmUnits),
+          // ARIMA specific params
+          p: parseInt(pValue),
+          d: parseInt(dValue),
+          q: parseInt(qValue),
+          // Prophet specific params
+          seasonalityMode,
+          changePointPrior: parseFloat(changePointPrior),
+          seasonalityPrior: parseFloat(seasonalityPrior),
+          // XGBoost specific params
+          maxDepth: parseInt(maxDepth),
+          learningRate: parseFloat(learningRate),
+          nEstimators: parseInt(nEstimators),
+          // Transformer specific params
+          numHeads: parseInt(numHeads),
+          numEncoderLayers: parseInt(numEncoderLayers),
+          dropoutRate: parseFloat(dropoutRate),
+          dimModel: parseInt(dimModel)
         }
       };
 
@@ -197,42 +235,84 @@ function App() {
                   />
                   LSTM
                 </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="arima"
+                    checked={modelType === 'arima'}
+                    onChange={() => setModelType('arima')}
+                  />
+                  ARIMA
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="prophet"
+                    checked={modelType === 'prophet'}
+                    onChange={() => setModelType('prophet')}
+                  />
+                  Prophet
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="xgboost"
+                    checked={modelType === 'xgboost'}
+                    onChange={() => setModelType('xgboost')}
+                  />
+                  XGBoost
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="transformer"
+                    checked={modelType === 'transformer'}
+                    onChange={() => setModelType('transformer')}
+                  />
+                  Transformer
+                </label>
               </div>
             </div>
             
-            <h3>Common Parameters</h3>
-            <div className="parameter-group">
-              <div className="form-group">
-                <label>Sequence Length:</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={sequenceLength}
-                  onChange={(e) => setSequenceLength(e.target.value)}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Dense Units:</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={denseUnits}
-                  onChange={(e) => setDenseUnits(e.target.value)}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Epochs:</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={epochs}
-                  onChange={(e) => setEpochs(e.target.value)}
-                />
-              </div>
-            </div>
+            {/* Common Parameters for Deep Learning Models */}
+            {(modelType === 'cnn' || modelType === 'lstm' || modelType === 'transformer') && (
+              <>
+                <h3>Common Parameters</h3>
+                <div className="parameter-group">
+                  <div className="form-group">
+                    <label>Sequence Length:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={sequenceLength}
+                      onChange={(e) => setSequenceLength(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Dense Units:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={denseUnits}
+                      onChange={(e) => setDenseUnits(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Epochs:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={epochs}
+                      onChange={(e) => setEpochs(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
             
+            {/* CNN specific parameters */}
             {modelType === 'cnn' && (
               <>
                 <h3>CNN Parameters</h3>
@@ -260,6 +340,7 @@ function App() {
               </>
             )}
             
+            {/* LSTM specific parameters */}
             {modelType === 'lstm' && (
               <>
                 <h3>LSTM Parameters</h3>
@@ -271,6 +352,175 @@ function App() {
                       min="1"
                       value={lstmUnits}
                       onChange={(e) => setLstmUnits(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            {/* ARIMA specific parameters */}
+            {modelType === 'arima' && (
+              <>
+                <h3>ARIMA Parameters</h3>
+                <div className="parameter-group">
+                  <div className="form-group">
+                    <label>p (AR order):</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={pValue}
+                      onChange={(e) => setPValue(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>d (Differencing):</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="2"
+                      value={dValue}
+                      onChange={(e) => setDValue(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>q (MA order):</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={qValue}
+                      onChange={(e) => setQValue(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            {/* Prophet specific parameters */}
+            {modelType === 'prophet' && (
+              <>
+                <h3>Prophet Parameters</h3>
+                <div className="parameter-group">
+                  <div className="form-group">
+                    <label>Seasonality Mode:</label>
+                    <select
+                      value={seasonalityMode}
+                      onChange={(e) => setSeasonalityMode(e.target.value)}
+                    >
+                      <option value="additive">Additive</option>
+                      <option value="multiplicative">Multiplicative</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Changepoint Prior Scale:</label>
+                    <input
+                      type="number"
+                      min="0.001"
+                      step="0.001"
+                      value={changePointPrior}
+                      onChange={(e) => setChangePointPrior(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Seasonality Prior Scale:</label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={seasonalityPrior}
+                      onChange={(e) => setSeasonalityPrior(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            {/* XGBoost specific parameters */}
+            {modelType === 'xgboost' && (
+              <>
+                <h3>XGBoost Parameters</h3>
+                <div className="parameter-group">
+                  <div className="form-group">
+                    <label>Max Depth:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="15"
+                      value={maxDepth}
+                      onChange={(e) => setMaxDepth(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Learning Rate:</label>
+                    <input
+                      type="number"
+                      min="0.001"
+                      max="1"
+                      step="0.001"
+                      value={learningRate}
+                      onChange={(e) => setLearningRate(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Number of Estimators:</label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="1000"
+                      value={nEstimators}
+                      onChange={(e) => setNEstimators(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            {/* Transformer specific parameters */}
+            {modelType === 'transformer' && (
+              <>
+                <h3>Transformer Parameters</h3>
+                <div className="parameter-group">
+                  <div className="form-group">
+                    <label>Number of Heads:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="16"
+                      value={numHeads}
+                      onChange={(e) => setNumHeads(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Number of Encoder Layers:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="12"
+                      value={numEncoderLayers}
+                      onChange={(e) => setNumEncoderLayers(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Dropout Rate:</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="0.5"
+                      step="0.01"
+                      value={dropoutRate}
+                      onChange={(e) => setDropoutRate(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Model Dimension:</label>
+                    <input
+                      type="number"
+                      min="16"
+                      max="512"
+                      step="16"
+                      value={dimModel}
+                      onChange={(e) => setDimModel(e.target.value)}
                     />
                   </div>
                 </div>
@@ -301,6 +551,19 @@ function App() {
                 <h3>RMSE:</h3>
                 <p>{results.rmse.toFixed(4)}</p>
               </div>
+              {/* Model-specific metrics */}
+              {modelType === 'arima' && results.aic && (
+                <div className="metric">
+                  <h3>AIC:</h3>
+                  <p>{results.aic.toFixed(4)}</p>
+                </div>
+              )}
+              {modelType === 'prophet' && results.mape && (
+                <div className="metric">
+                  <h3>MAPE:</h3>
+                  <p>{results.mape.toFixed(4)}%</p>
+                </div>
+              )}
             </div>
             
             <h3>Prediction Plot</h3>
@@ -308,26 +571,46 @@ function App() {
               <img src={`data:image/png;base64,${results.plot}`} alt="Prediction Plot" />
             </div>
             
+            {/* Feature importance for XGBoost */}
+            {modelType === 'xgboost' && results.featureImportance && (
+              <>
+                <h3>Feature Importance</h3>
+                <div className="plot-container">
+                  <img src={`data:image/png;base64,${results.featureImportance}`} alt="Feature Importance" />
+                </div>
+              </>
+            )}
+            
             <h3>Training History</h3>
             <div className="training-history">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Epoch</th>
-                    <th>Training Loss</th>
-                    <th>Validation Loss</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.history.loss.map((loss, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>{loss.toFixed(4)}</td>
-                      <td>{results.history.val_loss[index].toFixed(4)}</td>
+              {['cnn', 'lstm', 'transformer'].includes(modelType) && results.history && (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Epoch</th>
+                      <th>Training Loss</th>
+                      <th>Validation Loss</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {results.history.loss.map((loss, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{loss.toFixed(4)}</td>
+                        <td>{results.history.val_loss[index].toFixed(4)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {['arima', 'prophet', 'xgboost'].includes(modelType) && (
+                <div className="model-info">
+                  <p>Model training completed successfully.</p>
+                  {results.trainingTime && (
+                    <p>Training time: {results.trainingTime.toFixed(2)} seconds</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
